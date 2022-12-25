@@ -17,3 +17,7 @@ arr[1] = malloc(sizeof(char*)*2);
 ```
 
 * I used recursive merge sort and adapt it to work with Linked list because it gives the best performance in this situation, also no additional memory is allocated for this. 
+
+* init.sh for max optimization and init_debug.sh for debuging
+
+* valgrid.sh for memory leak testing
