@@ -31,10 +31,12 @@
     void StringListNullCheck(char*** list);
     
     void StringListFreeNode(char*** list);
-    // Checks if list is usable for operations. Checks if node value is NULL.
+    // Checks if list is usable for operations. Checks if node value is not NULL.
     void StringListCheckInegrity(char*** list);
-    // Reallocating space for new string and clean old.
-    void ReplaceStringInNode(char ***node, const char *str);
+    // Checks if parameter not null. 
+    // Checks if list is usabe for operations. 
+    // Checks if node value is not NULL.
+    void StringListCheck(char ***list, const char *str);
     // Linked list version of Merge Sort.
     char** MergeSort(char ***head);
     // Find middle by advancing fast for 2 pointers and slow for 1.

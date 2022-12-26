@@ -49,12 +49,7 @@ char** MergeSortMiddle(char ***head){
     }
     return slow;
 }
-void ReplaceStringInNode(char ***node, const char *str){
-    free((*node)[0]);
-    (*node)[0] = NULL;
-    (*node)[0] = malloc(sizeof(char) * strlen(str));
-    strncpy((*node)[0], str, strlen(str));
-}
+
 void StringListNullCheck(char ***list){
     if(list == NULL || *list == NULL ){
         printf("ERROR: NULL pointer exception;\n");
@@ -68,11 +63,18 @@ void StringListCheckInegrity(char ***list){
         exit(1);
     }
 }
+void StringListCheck(char ***list, const char *param){
+    StringListCheckInegrity(list);
+    if(param == NULL){
+        printf("ERROR: Parameter cannot be empty;\n");
+        exit(1);
+    }
+}
 void StringListFreeNode(char ***node){
     StringListNullCheck(node);
     free(**node);
-    free(*node);
     **node = NULL;
+    free(*node);
     *node = NULL;
 }
 void StringListPrint(char ***list)
@@ -108,12 +110,12 @@ void StringListAdd(char ***list, const char *str)
 {
     StringListNullCheck(list);
     if(str == NULL){
-        printf("ERROR: String cannot be empty\n");
+        printf("ERROR: Parameter cannot be empty;\n");
         exit(1);
     }
     if((*list)[0] == NULL){
         (*list)[0] = malloc(sizeof(char) * strlen(str));
-        strncpy((*list)[0], str,strlen(str));
+        strcpy((*list)[0], str);
     }
     else{
         char **temp = *list;
@@ -123,38 +125,38 @@ void StringListAdd(char ***list, const char *str)
         temp[1] = malloc(sizeof(char*)*2);
         char **node = (char**)temp[1];
         node[0] = malloc(sizeof(char) * strlen(str));
-        strncpy(node[0], str,strlen(str));
+        strcpy(node[0], str);
         node[1] = NULL;
     }
 }
 void StringListRemove(char ***list, const char *str){
-    StringListCheckInegrity(list);
-    char **prev = *list;
-    if(strcmp(prev[0], str) == 0){
-        if(prev[1] == NULL){
-            StringListDestroy(list);
-            return;
+    StringListCheck(list, str);
+    char **temp = *list;
+    if(strcmp(temp[0], str) != 0 && temp[1] != NULL){
+        char **next = temp[1];
+        do {
+            // strcmp returns 0 if they are equal
+            if(strcmp(next[0], str) == 0){
+                
+                temp[1] = next[1];
+                StringListFreeNode(&next);
+                return;
+            }
+            next = (char**)next[1];
+            temp = (char**)temp[1];
         }
-        else{
-            *list = (char**)(*list)[1];
-            StringListFreeNode(&prev);
-        }
-        return;
+        while(next);
     }
-
-    char **temp = (char**)(*list)[1];
-    do {
-        // strcmp returns 0 if they are equal
-        if(strcmp(temp[0], str) == 0){
-            prev[1] = temp[1];
+    else if(strcmp(temp[0], str) == 0){
+        if(temp[1] == NULL){
             
-        StringListFreeNode(&temp);
+            free(temp[0]);
+            temp[0] = NULL;
             return;
-        }
-        temp = (char**)temp[1];
-        prev = (char**)prev[1];
+        } 
+        *list = (char**)((*list)[1]);
+        StringListFreeNode(&temp);
     }
-    while(temp);
 }
 size_t StringListSize(char ***list) {
     StringListCheckInegrity(list);
@@ -168,10 +170,10 @@ size_t StringListSize(char ***list) {
     return index;
 }
 size_t StringListIndexOf(char ***list, const char *str){
-    StringListCheckInegrity(list);
+    StringListCheck(list, str);
     char **temp = *list;
     size_t index = 0;
-  
+
     while(temp){
         // strcmp returns 0 if they are equal
         if(strcmp((temp[0]),str) == 0) {
@@ -214,12 +216,42 @@ void StringListReplaceInStrings(char ***list, const char *before, const char *af
         exit(1);
     }
     char **temp = *list;
+    
     while(temp){
-        if(strcmp(temp[0], before) == 0){
-            ReplaceStringInNode(&temp, after);
-        }
-        temp = (char**)temp[1];
+        char *s = temp[0];
+        char* result; 
+        int i, cnt = 0; 
+        int newWlen = strlen(after); 
+        int oldWlen = strlen(before); 
+
+        for (i = 0; s[i] != '\0'; i++) { 
+            if (strstr(&s[i], before) == &s[i]) { 
+                cnt++; 
+                i += oldWlen - 1; 
+            } 
+        } 
+
+        result = (char*)malloc(i + cnt * (newWlen - oldWlen) + 1); 
+
+        i = 0; 
+        while (*s) { 
+            if (strstr(s, before) == s) { 
+                strcpy(&result[i], after); 
+                i += newWlen; 
+                s += oldWlen; 
+            } 
+            else
+                result[i++] = *s++; 
+        } 
+
+        result[i] = '\0';
+        char *to_free = temp[0];
+        temp[0] = result;
+        free(to_free);
+        to_free = NULL;
+        temp = temp[1]; 
     }
+
 }
 void StringListSort(char ***list){
     StringListCheckInegrity(list); 
